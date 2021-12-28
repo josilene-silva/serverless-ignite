@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@middy/core": "^2.5.3",
-    "@middy/http-json-body-parser": "^2.5.3"
+    "@middy/http-json-body-parser": "^2.5.3",
+    "chrome-aws-lambda": "^10.1.0",
+    "dayjs": "^1.10.7",
+    "handlebars": "^4.7.7"
   },
   "devDependencies": {
     "@serverless/typescript": "^2.23.0",
