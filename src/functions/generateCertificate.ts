@@ -3,6 +3,7 @@ import { join } from "path";
 import { readFileSync } from "fs";
 import { compile as handlebarsCompile } from "handlebars";
 import dayjs from "dayjs";
+import { S3 } from "aws-sdk";
 
 import { document } from "../utils/dynamodbClient";
 
@@ -31,14 +32,26 @@ const compile = async function(data: ITemplate) {
 export const handle = async (event) => {
     const { id, name, grade } = JSON.parse(event.body) as ICreateCertificate;
 
-    await document.put({
+    const response = await document.query({
         TableName: "users_certificates",
-        Item: {
-            id,
-            name,
-            grade,
+        KeyConditionExpression: "id = :id",
+        ExpressionAttributeValues: {
+            ":id": id,
         }
     }).promise();
+
+    const userAlreadyExists = response.Items[0];
+
+    if(!userAlreadyExists) {
+        await document.put({
+            TableName: "users_certificates",
+            Item: {
+                id,
+                name,
+                grade,
+            }
+        }).promise();
+    }
 
     const medalPath = join(process.cwd(), "src", "templates", "selo.png");
     const medal = readFileSync(medalPath, "base64");
@@ -74,10 +87,21 @@ export const handle = async (event) => {
 
     await browser.close();
 
+    const s3 = new S3();
+
+    await s3.putObject({
+        Bucket: "serverlesscertificatesignite-josi",
+        Key: `${id}.pdf`,
+        ACL: "public-read",
+        Body: pdf,
+        ContentType: "application/pdf",
+    }).promise();
+
     return {
         statusCode: 201,
         body: JSON.stringify({
             message: "Certificate created!",
+            url: `https://serverlesscertificatesignite-josi.s3.sa-east-1.amazonaws.com/${id}.pdf`,
         }),
         headers: {
             "Content-Type": "application/json",
