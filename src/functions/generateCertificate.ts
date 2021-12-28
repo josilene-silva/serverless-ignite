@@ -1,4 +1,4 @@
-import chromium from "chrome-aws-lambda";
+import { puppeteer, args, defaultViewport, executablePath } from "chrome-aws-lambda";
 import { join } from "path";
 import { readFileSync } from "fs";
 import { compile as handlebarsCompile } from "handlebars";
@@ -52,6 +52,27 @@ export const handle = async (event) => {
     };
 
     const content = await compile(data);
+
+    const browser = await puppeteer.launch({
+        headless: true, // default
+        args,
+        defaultViewport,
+        executablePath: await executablePath,
+    });
+
+    const page = await browser.newPage();
+
+    await page.setContent(content);
+
+    const pdf = await page.pdf({
+        format: "a4",
+        landscape: true,
+        path: process.env.IS_OFFLINE ? "certificate.pdf": null,
+        printBackground: true,
+        preferCSSPageSize: true,
+    });
+
+    await browser.close();
 
     return {
         statusCode: 201,
