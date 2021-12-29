@@ -17,13 +17,14 @@
     "chrome-aws-lambda": "^10.1.0",
     "dayjs": "^1.10.7",
     "handlebars": "^4.7.7",
-    "puppeteer-core": "^13.0.1",
-    "puppeteer": "^8.0.0"
+    "puppeteer": "^8.0.0",
+    "puppeteer-core": "^13.0.1"
   },
   "devDependencies": {
     "@serverless/typescript": "^2.23.0",
     "@types/aws-lambda": "^8.10.71",
     "@types/node": "^14.14.25",
+    "copy-webpack-plugin": "^10.2.0",
     "json-schema-to-ts": "^1.5.0",
     "serverless": "^2.23.0",
     "serverless-dynamodb-local": "^0.2.40",

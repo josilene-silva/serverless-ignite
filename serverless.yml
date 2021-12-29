@@ -18,11 +18,25 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
+  bucket: serverlesscertificatesignite-josi
 
 provider:
   name: aws
   runtime: nodejs14.x
   region: sa-east-1
+  # memorySize: 256
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
+
+# package:
+#   individually: true
 
 functions:
   generateCertificate:
@@ -32,6 +46,12 @@ functions:
         path: /generateCertificate
         method: POST
         cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:PutItem
+        Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
   verifyCertificate:
     handler: src/functions/verifyCertificate.handle
     events:
@@ -39,6 +59,11 @@ functions:
         path: /verifyCertificate/{id}
         method: GET
         cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
 
 resources:
   Resources:
